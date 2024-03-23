@@ -1,9 +1,9 @@
 all:run-test run-test-ens
 
 run-test:test.cpp ../common.c
-	$(CXX) -O3 -Wall -std=c++17 -DNO_PARALLEL $< -o $@
+	$(CXX) -O3 -Wall -std=c++17 $< -o $@
 
-run-test-ens:test.cpp ../common.c
+run-test-ens:test-ens.cpp ../common.c
 	$(CXX) -O3 -Wall -std=c++17 $< -o $@
 
 clean:

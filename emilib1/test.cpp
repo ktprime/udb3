@@ -2,7 +2,7 @@
 #include <functional>
 
 // cloned on 2023-12-12
-#include "emilib2o.hpp"
+#include "emilib2ss.hpp"
 
 struct Hash32 {
 	//using is_avalanching = void;
@@ -13,7 +13,7 @@ struct Hash32 {
 
 void test_int(uint32_t N, uint32_t n0, int32_t is_del, uint32_t x0, uint32_t n_cp, udb_checkpoint_t *cp)
 {
-	emilib2::HashMap<uint32_t, uint32_t, Hash32> h;
+	emilib::HashMap<uint32_t, uint32_t, Hash32> h;
 	uint32_t step = (N - n0) / (n_cp - 1);
 	uint32_t i, x, n, j;
 	uint64_t z = 0;

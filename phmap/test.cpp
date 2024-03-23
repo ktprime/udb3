@@ -26,7 +26,7 @@ void test_int(uint32_t N, uint32_t n0, int32_t is_del, uint32_t x0, uint32_t n_c
 			x = udb_hash32(x);
 			uint32_t key = udb_get_key(n, x);
 			if (is_del) {
-				auto p = h.try_emplace(udb_get_key(n, x), i);
+				auto p = h.try_emplace(key, i);
 				if (p.second == false) h.erase(p.first);
 				else ++z;
 			} else {
