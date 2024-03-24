@@ -1,5 +1,7 @@
 #include "../common.c"
 
+#include <stdexcept>
+#include <limits>
 // https://github.com/skarupke/flat_hash_map
 // cloned on 2018-09-29, which remain the latest on 2023-12-12
 #include "bytell_hash_map.hpp"
