@@ -1,8 +1,8 @@
 #include "../common.c"
 #include <functional>
 
-// https://github.com/ktrime/emhash/thirdpaty/emilib/
-#include "emilib2o.hpp"
+// https://github.com/ktrime/emhash/thirdpaty/emilib/emilib2s.hpp
+#include "emilib2s.hpp"
 
 struct Hash32 {
 	inline size_t operator()(const uint32_t x) const {
@@ -12,7 +12,7 @@ struct Hash32 {
 
 void test_int(uint32_t N, uint32_t n0, int32_t is_del, uint32_t x0, uint32_t n_cp, udb_checkpoint_t *cp)
 {
-	emilib2::HashMap<uint32_t, uint32_t, Hash32> h;
+	emilib3::HashMap<uint32_t, uint32_t, Hash32> h;
 	uint32_t step = (N - n0) / (n_cp - 1);
 	uint32_t i, n, j;
 	uint64_t z = 0, x = x0;

@@ -16,8 +16,10 @@
 #ifndef __clang__
 #  include <zmmintrin.h>
 #endif
-#else
+#elif __x86_64__ 
 #  include <x86intrin.h>
+#else
+# include "sse2neon.h" 
 #endif
 
 #undef EMH_LIKELY
@@ -908,7 +910,6 @@ public:
                 size_t main_bucket;
                 const auto key_h2 = hash_key2(main_bucket, src_pair.first);
                 const auto bucket = find_empty_slot(main_bucket, main_bucket, 0);
-
                 set_states(bucket, key_h2);
                 const auto slot = bucket_to_slot(bucket);
                 new(_pairs + slot) PairT(std::move(src_pair));
@@ -932,10 +933,10 @@ private:
     {
         // Prefetch the heap-allocated memory region to resolve potential TLB
         // misses.  This is intended to overlap with execution of calculating the hash for a key.
-#if __linux__
-        __builtin_prefetch(static_cast<const void*>(ctrl));
-#elif _WIN32
+#if defined(_MSC_VER) && (defined(_M_X64) || defined(_M_IX86))
         _mm_prefetch((const char*)ctrl, _MM_HINT_T0);
+#elif defined(__GNUC__)
+        __builtin_prefetch(static_cast<const void*>(ctrl));
 #endif
     }
 
@@ -976,7 +977,7 @@ private:
         if (offset < simd_bytes)// || _num_buckets < 32 * simd_bytes)
             next_bucket += simd_bytes * offset;
         else
-            next_bucket += _num_buckets / 32 + simd_bytes;
+            next_bucket += _num_buckets / 64 + simd_bytes;
 #else
         next_bucket += 3 * simd_bytes;
         if (next_bucket >= _num_buckets)
@@ -1074,7 +1075,6 @@ private:
             return hole;
         }
 
-        prefetch_heap_block((char*)&_pairs[bucket_to_slot(next_bucket)]);
         const auto ebucket = find_empty_slot(main_bucket, next_bucket, offset);
         set_states(ebucket, key_h2);
         return ebucket;
@@ -1099,6 +1099,7 @@ private:
             const auto maske = empty_delete(next_bucket) & group_bmask;
             if (maske != 0) {
                 const auto probe = CTZ(maske) + next_bucket;
+                prefetch_heap_block((char*)&_pairs[probe]);
                 set_group_probe(gbucket, offset);
                 return probe;
             }

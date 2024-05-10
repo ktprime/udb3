@@ -1,11 +1,10 @@
 #include "../common.c"
 #include <functional>
 
-// cloned on 2023-12-12
+// https://github.com/ktrime/emhash/thirdpaty/emilib/
 #include "emilib2ss.hpp"
 
 struct Hash32 {
-	//using is_avalanching = void;
 	inline size_t operator()(const uint32_t x) const {
 		return udb_hash_fn(x);
 	}

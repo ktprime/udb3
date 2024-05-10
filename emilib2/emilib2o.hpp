@@ -16,8 +16,10 @@
 #ifndef __clang__
 #  include <zmmintrin.h>
 #endif
-#else
+#elif __x86_64__ 
 #  include <x86intrin.h>
+#else
+# include "sse2neon.h" 
 #endif
 
 #undef EMH_LIKELY
@@ -964,10 +966,10 @@ private:
     {
         // Prefetch the heap-allocated memory region to resolve potential TLB
         // misses.  This is intended to overlap with execution of calculating the hash for a key.
-#if __linux__
-        __builtin_prefetch(static_cast<const void*>(ctrl));
-#elif _WIN32
+#if defined(_MSC_VER) && (defined(_M_X64) || defined(_M_IX86))
         _mm_prefetch((const char*)ctrl, _MM_HINT_T0);
+#elif defined(__GNUC__)
+        __builtin_prefetch(static_cast<const void*>(ctrl));
 #endif
     }
 
@@ -977,7 +979,7 @@ private:
         if (EMH_UNLIKELY(_offset[main_bucket] > 128))
             return (_offset[main_bucket] - 127) * 128;
 #endif
-        return _offset[main_bucket];
+        return _offset[main_bucket / 4];
     }
 
     inline void set_offset(size_t main_bucket, uint32_t off)
@@ -985,8 +987,7 @@ private:
 #if EMH_SAFE_PSL
         _offset[main_bucket] = off <= 128 ? off : 128 + off / 128;
 #else
-        assert(off < 256);
-        _offset[main_bucket] = off;
+        _offset[main_bucket / 4] = off;
 #endif
     }
 
@@ -998,8 +999,8 @@ private:
     inline size_t get_next_bucket(size_t next_bucket, size_t offset) const
     {
 #if EMH_PSL_LINEAR == 0
-        next_bucket += offset < 8 ? 7 + simd_bytes * offset / 2 : _mask / 32 + 2;
-        next_bucket += next_bucket >= _num_buckets;
+		next_bucket += offset < 8 ? simd_bytes * offset: _num_buckets / 32; next_bucket += 1;
+        //next_bucket += simd_bytes * offset + 1;
 #elif EMH_PSL_LINEAR == 1
         if (offset < 8)
             next_bucket += simd_bytes * 2 + offset;
@@ -1133,7 +1134,6 @@ private:
         }
 
         const auto ebucket = find_empty_slot(main_bucket, next_bucket, offset);
-        //prefetch_heap_block((char*)&_pairs[ebucket]);
         set_states(ebucket, key_h2);
         return ebucket;
     }
@@ -1200,8 +1200,10 @@ private:
                 goto JNEXT_BLOCK;
 
             ebucket = next_bucket + CTZ(maske);
+            prefetch_heap_block((char*)&_pairs[ebucket]);
             if (offset <= get_offset(main_bucket))
                 return ebucket;
+
 #if EMH_PSL > 8 && EMH_PSL_LINEAR
             else if (EMH_UNLIKELY(offset >= EMH_PSL)) {
                 const auto kbucket = update_offset(main_bucket, ebucket, offset);
