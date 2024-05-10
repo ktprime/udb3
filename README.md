@@ -4,7 +4,7 @@ This is the third version of Unordered Dictionary Benchmark (udb3). It
 evaluates the performance of several popular hash table libraries in C or C++.
 Results first; explanations later:
 
-<img align="left" src="__logs/231216-M1.png"/>
+<img align="left" src="https://i.ibb.co/Nrxr81J/240509-fast.png"/>
 
 ### The tasks
 
@@ -32,22 +32,6 @@ the memory at the same time**. If library *A* is faster and uses less memory tha
 *B*, *A* will be better no matter how we tune the load factor of *B*. If *A* is
 faster but uses more memory, we cannot draw a firm conclusion but at least we
 will see the speed-memory tradeoff of a library.
-
-### Ensemble of hash tables
-
-This benchmark involves three implementations with an ensemble of hash tables,
-which may need a clarification here. Suppose a hash table consists of `n`
-smaller sub hash tables. A key `x` is located in sub-table `hash(x) %
-n`. Because it is rare for all sub-tables to rehash at the same time, the peak
-memory can be reduced. You can find more explanation in [this blog][ensemble].
-In my opinion, **using an ensemble of hash tables it the best strategy for huge
-hash tables**.
-
-We can implement a hash table ensemble in the user space for any libraries. I
-have been using the idea since 2015. Nonetheless, it is more convenient to
-hide the details behind the library code such that users can use familiar hash
-table APIs. [phmap][phmap] is perhaps the first library to do this. I have
-recently integrated the ensemble idea into my [khashl.h][khashl] as well.
 
 ## Results
 
@@ -78,7 +62,7 @@ insertion but does not perform well on deletion. I developed [khashl][khashl].
 The figure above focuses on high-performance hash table libraries. The figure
 below shows several other popular libraries.
 
-<img align="left" src="__logs/231216-M1a.png"/>
+<img align="left" src="https://i.ibb.co/s9vP59h/240509-slow.png"/>
 
 We can see that `std::unordered_map` in clang and [uthash][uthash] are times slower and
 use more memory. They should be avoided if you need a fast hash table.
@@ -101,8 +85,6 @@ is hard. Developers interested in hash table performances are recommended to
 read other benchmarks such as [this][bench1] and [this][bench2].
 
 [lf]: https://en.wikipedia.org/wiki/Hash_table#Load_factor
-[ensemble]: https://greg7mdp.github.io/parallel-hashmap/
-[phmap]: https://github.com/greg7mdp/parallel-hashmap
 [khashl]: https://github.com/attractivechaos/klib/blob/master/khashl.h
 [boost]: http://bannalia.blogspot.com/2022/11/inside-boostunorderedflatmap.html
 [absl]: https://abseil.io/docs/cpp/guides/container
